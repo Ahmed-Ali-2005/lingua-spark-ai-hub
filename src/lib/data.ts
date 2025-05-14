@@ -260,6 +260,93 @@ export const languageContent = {
       ],
       // Other content types would be defined here
     }
+  },
+  german: {
+    a1: {
+      videos: [
+        {
+          id: "de-a1-v1",
+          title: "Deutsch für Anfänger: Aussprache",
+          description: "Learn German pronunciation basics with helpful examples.",
+          url: "https://www.youtube.com/embed/APkuZSigok0",
+          duration: "10:15",
+          thumbnailUrl: "https://i.ytimg.com/vi/APkuZSigok0/maxresdefault.jpg",
+        },
+        {
+          id: "de-a1-v2",
+          title: "German Greetings and Introductions",
+          description: "Learn how to greet people and introduce yourself in German.",
+          url: "https://www.youtube.com/embed/xCOmD7Ps4hU",
+          duration: "8:32",
+          thumbnailUrl: "https://i.ytimg.com/vi/xCOmD7Ps4hU/maxresdefault.jpg",
+        }
+      ],
+      documents: [
+        {
+          id: "de-a1-d1",
+          title: "German A1 Vocabulary List",
+          description: "Essential vocabulary for beginners in German.",
+          fileUrl: "/docs/german/a1/vocabulary.pdf",
+          pages: 6,
+          thumbnailUrl: "/thumbnails/german-a1-vocab.png",
+        },
+        {
+          id: "de-a1-d2",
+          title: "German Basic Grammar Guide",
+          description: "A simple guide to understanding basic German grammar.",
+          fileUrl: "/docs/german/a1/grammar-guide.pdf",
+          pages: 12,
+          thumbnailUrl: "/thumbnails/german-a1-grammar.png",
+        }
+      ],
+      quizzes: [
+        {
+          id: "de-a1-q1",
+          title: "Basic German Greetings Quiz",
+          description: "Test your knowledge of basic German greetings.",
+          questions: [
+            {
+              question: "How do you say 'Hello' in German?",
+              options: ["Hallo", "Tschüss", "Danke", "Bitte"],
+              correctAnswer: "Hallo"
+            },
+            {
+              question: "Which phrase means 'How are you?' in German?",
+              options: ["Ich heiße", "Wie geht es dir?", "Auf Wiedersehen", "Vielen Dank"],
+              correctAnswer: "Wie geht es dir?"
+            },
+            {
+              question: "How do you say 'Good evening' in German?",
+              options: ["Guten Morgen", "Guten Abend", "Guten Tag", "Gute Nacht"],
+              correctAnswer: "Guten Abend"
+            },
+            {
+              question: "What is the correct way to say 'Thank you very much' in German?",
+              options: ["Bitte schön", "Entschuldigung", "Vielen Dank", "Bitte"],
+              correctAnswer: "Vielen Dank"
+            },
+            {
+              question: "How do you say 'Goodbye' in German?",
+              options: ["Hallo", "Guten Tag", "Auf Wiedersehen", "Guten Morgen"],
+              correctAnswer: "Auf Wiedersehen"
+            }
+          ]
+        },
+      ],
+      vocabulary: [
+        { word: "hallo", translation: "hello", pronunciation: "/haˈloː/", audioUrl: "/audio/german/hallo.mp3" },
+        { word: "auf wiedersehen", translation: "goodbye", pronunciation: "/aʊ̯f ˈviːdɐˌzeːən/", audioUrl: "/audio/german/aufwiedersehen.mp3" },
+        { word: "danke", translation: "thank you", pronunciation: "/ˈdaŋkə/", audioUrl: "/audio/german/danke.mp3" },
+        { word: "bitte", translation: "please / you're welcome", pronunciation: "/ˈbɪtə/", audioUrl: "/audio/german/bitte.mp3" },
+        { word: "entschuldigung", translation: "excuse me / sorry", pronunciation: "/ɛntˈʃʊldɪɡʊŋ/", audioUrl: "/audio/german/entschuldigung.mp3" },
+        { word: "ja", translation: "yes", pronunciation: "/jaː/", audioUrl: "/audio/german/ja.mp3" },
+        { word: "nein", translation: "no", pronunciation: "/naɪ̯n/", audioUrl: "/audio/german/nein.mp3" },
+        { word: "wie heißt du?", translation: "what's your name?", pronunciation: "/viː haɪst duː/", audioUrl: "/audio/german/wieheißtdu.mp3" },
+        { word: "ich heiße", translation: "my name is", pronunciation: "/ɪç ˈhaɪsə/", audioUrl: "/audio/german/ichheiße.mp3" },
+        { word: "wie geht es dir?", translation: "how are you?", pronunciation: "/viː geːt ɛs diːɐ̯/", audioUrl: "/audio/german/wiegehtesdir.mp3" }
+      ]
+    }
+    // Other levels for German would be defined similarly
   }
 };
 
