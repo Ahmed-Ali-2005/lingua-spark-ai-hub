@@ -6,6 +6,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { aiChatExamples } from "@/lib/data";
 import { generateAIResponse } from "@/lib/aiService";
+import { toast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 type Message = {
   id: string;
@@ -19,6 +22,8 @@ const AiAssistant = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [apiKey, setApiKey] = useState<string>(localStorage.getItem("openai_api_key") || "");
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState<boolean>(!localStorage.getItem("openai_api_key"));
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Initial system message
@@ -38,10 +43,33 @@ const AiAssistant = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
   
+  const saveApiKey = () => {
+    if (apiKey.trim()) {
+      localStorage.setItem("openai_api_key", apiKey);
+      setShowApiKeyDialog(false);
+      toast({
+        title: "API Key Saved",
+        description: "Your OpenAI API key has been saved for this session.",
+      });
+    } else {
+      toast({
+        title: "API Key Required",
+        description: "Please enter a valid OpenAI API key to use the AI assistant.",
+        variant: "destructive",
+      });
+    }
+  };
+  
   const handleSendMessage = async (e?: React.FormEvent) => {
     e?.preventDefault();
     
     if (!inputValue.trim()) return;
+    
+    // Check if API key is available
+    if (!apiKey) {
+      setShowApiKeyDialog(true);
+      return;
+    }
     
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -59,7 +87,8 @@ const AiAssistant = () => {
         messages.concat(userMessage).map(msg => ({ 
           role: msg.role, 
           content: msg.content 
-        }))
+        })),
+        apiKey
       );
       
       const assistantMessage: Message = {
@@ -75,7 +104,7 @@ const AiAssistant = () => {
       
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: "Sorry, I encountered an error. Please try again.",
+        content: "Sorry, I encountered an error. Please check your API key and try again.",
         role: "assistant",
         timestamp: new Date(),
       };
@@ -90,6 +119,13 @@ const AiAssistant = () => {
     setInputValue(example);
   };
   
+  const renderMessageContent = (content: string) => {
+    // Convert markdown-like text to HTML (simple implementation)
+    return content.split('\n').map((line, i) => (
+      <p key={i} className={line.startsWith('- ') ? 'pl-4' : ''}>{line}</p>
+    ));
+  };
+  
   return (
     <div className="container py-8 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-2">{t("assistantTitle")}</h1>
@@ -101,6 +137,9 @@ const AiAssistant = () => {
           <Card className="flex-1">
             <CardHeader className="border-b">
               <CardTitle>AI Language Assistant</CardTitle>
+              <CardDescription>
+                Powered by OpenAI
+              </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <div className="h-[500px] overflow-y-auto p-4">
@@ -118,7 +157,7 @@ const AiAssistant = () => {
                           : "bg-muted"
                       }`}
                     >
-                      <div className="whitespace-pre-wrap">{message.content}</div>
+                      <div className="whitespace-pre-wrap">{renderMessageContent(message.content)}</div>
                       <div className="text-xs opacity-70 mt-1">
                         {message.timestamp.toLocaleTimeString([], {
                           hour: "2-digit",
@@ -158,6 +197,17 @@ const AiAssistant = () => {
               </form>
             </CardFooter>
           </Card>
+          
+          {!apiKey && (
+            <Alert className="mt-4">
+              <AlertDescription>
+                To use the AI assistant, you need to provide an OpenAI API key.
+                <Button variant="link" className="p-0 h-auto" onClick={() => setShowApiKeyDialog(true)}>
+                  Set API Key
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
         
         {/* Examples Column */}
@@ -184,6 +234,42 @@ const AiAssistant = () => {
           </Card>
         </div>
       </div>
+      
+      {/* API Key Dialog */}
+      <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Enter OpenAI API Key</DialogTitle>
+            <DialogDescription>
+              Your API key is stored locally and never sent to our servers.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Input
+                id="apiKey"
+                placeholder="sk-..."
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                You can get your API key from{" "}
+                <a
+                  href="https://platform.openai.com/api-keys"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline"
+                >
+                  OpenAI's website
+                </a>
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={saveApiKey}>Save Key</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

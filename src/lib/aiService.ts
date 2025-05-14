@@ -1,6 +1,5 @@
 
-// This is a mock implementation of AI assistant functionality
-// In a real app, this would connect to an API like GPT or Claude
+// AI assistant service using OpenAI API
 
 type ChatMessage = {
   role: "user" | "assistant" | "system";
@@ -9,10 +8,52 @@ type ChatMessage = {
 
 export const generateAIResponse = async (
   messages: ChatMessage[],
-  languageId?: string
+  apiKey?: string
 ): Promise<string> => {
   console.log("Generating AI response for:", messages);
   
+  // If no API key is provided, use the mock implementation
+  if (!apiKey) {
+    return generateMockResponse(messages);
+  }
+  
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are a helpful language learning assistant. You can explain grammar concepts, provide translations, give examples, and help with language practice. Keep your responses informative but concise."
+          },
+          ...messages.slice(-10) // Only send the last 10 messages to avoid token limits
+        ],
+        max_tokens: 500,
+        temperature: 0.7
+      })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("OpenAI API error:", errorData);
+      throw new Error(errorData.error?.message || "Error calling OpenAI API");
+    }
+    
+    const data = await response.json();
+    return data.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
+  } catch (error) {
+    console.error("Error calling OpenAI API:", error);
+    throw error;
+  }
+};
+
+// Mock implementation for fallback
+const generateMockResponse = async (messages: ChatMessage[]): Promise<string> => {
   // Simulating API delay
   await new Promise(resolve => setTimeout(resolve, 1500));
   
@@ -32,11 +73,7 @@ export const generateAIResponse = async (
   }
   
   if (userMessage.includes("conversation") || userMessage.includes("practice")) {
-    if (languageId === "french") {
-      return "Let's practice ordering food in French:\n\nServeur: Bonjour ! Puis-je vous aider ?\n(Hello! May I help you?)\n\nYou can respond with: 'Bonjour, je voudrais voir le menu, s'il vous plaît.'\n(Hello, I would like to see the menu, please.)\n\nServeur: Bien sûr, voici le menu. Que souhaitez-vous commander ?\n(Of course, here's the menu. What would you like to order?)\n\nTry responding with what you'd like to order!";
-    } else {
-      return "Let's practice a basic conversation. Imagine we're meeting for the first time.\n\nMe: Hello! My name is AI Assistant. What's your name?\n\nNow you can respond with your name and ask me how I am.";
-    }
+    return "Let's practice a basic conversation. Imagine we're meeting for the first time.\n\nMe: Hello! My name is AI Assistant. What's your name?\n\nNow you can respond with your name and ask me how I am.";
   }
   
   if (userMessage.includes("translate")) {
