@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useLanguage } from "@/hooks/useLanguage";
 import { languages, cefrLevels, languageContent } from "@/lib/data";
+import { toast } from "@/components/ui/use-toast";
 
 const LevelDetail = () => {
   const { languageId, levelId } = useParams<{ languageId: string; levelId: string }>();
@@ -67,6 +68,31 @@ const LevelDetail = () => {
     );
   }
   
+  const handlePlayVideo = (video: any) => {
+    setSelectedVideo(video);
+    // For embedded YouTube videos, we need to use the correct embedding URL
+    if (!video.url.includes('embed')) {
+      toast({
+        title: "Video Loading Issue",
+        description: "This video might not play correctly due to embedding restrictions.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const handleDownloadResource = (resource: any) => {
+    if (!resource.fileUrl || resource.fileUrl.startsWith('/docs/')) {
+      toast({
+        title: "Resource Not Available",
+        description: "This resource is not available for download yet.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    window.open(resource.fileUrl, '_blank');
+  };
+  
   return (
     <div className="container py-8">
       <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -109,7 +135,7 @@ const LevelDetail = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {content.videos?.map((video) => (
               <Card key={video.id} className="overflow-hidden">
-                <div className="aspect-video relative cursor-pointer" onClick={() => setSelectedVideo(video)}>
+                <div className="aspect-video relative cursor-pointer" onClick={() => handlePlayVideo(video)}>
                   <img src={video.thumbnailUrl} alt={video.title} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/50 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 3 14 9-14 9V3z"/></svg>
@@ -125,7 +151,7 @@ const LevelDetail = () => {
                   <CardDescription className="line-clamp-2">{video.description}</CardDescription>
                 </CardContent>
                 <CardFooter>
-                  <Button onClick={() => setSelectedVideo(video)}>
+                  <Button onClick={() => handlePlayVideo(video)}>
                     {t("watchVideo")}
                   </Button>
                 </CardFooter>
@@ -157,7 +183,7 @@ const LevelDetail = () => {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full">
+                  <Button className="w-full" onClick={() => handleDownloadResource(doc)}>
                     {t("downloadPdf")}
                   </Button>
                 </CardFooter>
@@ -253,7 +279,10 @@ const LevelDetail = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" onClick={() => toast({
+                  title: "Vocabulary List",
+                  description: "Download functionality will be available soon.",
+                })}>
                   Download Complete Vocabulary List
                 </Button>
               </CardFooter>
@@ -275,16 +304,35 @@ const LevelDetail = () => {
           </DialogHeader>
           <div className="mt-4">
             <AspectRatio ratio={16/9}>
-              <iframe
-                width="100%"
-                height="100%"
-                src={selectedVideo?.url}
-                title={selectedVideo?.title}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="rounded-md"
-              ></iframe>
+              {selectedVideo?.url ? (
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={selectedVideo.url.includes('embed') ? selectedVideo.url : `https://www.youtube.com/embed/${selectedVideo.url.split('v=')[1] || selectedVideo.url.split('/').pop()}`}
+                  title={selectedVideo?.title}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="rounded-md"
+                  onError={() => {
+                    toast({
+                      title: "Video Error",
+                      description: "Unable to load video. Please try again later.",
+                      variant: "destructive",
+                    });
+                  }}
+                ></iframe>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-muted">
+                  <div className="text-center">
+                    <div className="mb-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mx-auto"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </div>
+                    <p className="text-lg font-medium">Video Unavailable</p>
+                    <p className="text-sm text-muted-foreground">This video cannot be played at the moment</p>
+                  </div>
+                </div>
+              )}
             </AspectRatio>
           </div>
         </DialogContent>
